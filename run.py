@@ -2,6 +2,8 @@ from PIL import Image, ImageStat
 import os
 import numpy as np
 import time
+import scipy.signal as signal
+import matplotlib.pyplot as plt
 
 
 def get_pic(_pic_path):
@@ -10,7 +12,7 @@ def get_pic(_pic_path):
 
 
 def calculate_time(dis):
-    return int(dis * 710 / 474.6)
+    return int(dis * 710 / 455.8)
 
 
 def analyse_pic(_pic_path):
@@ -30,7 +32,7 @@ def analyse_pic(_pic_path):
         print(self_x, self_y)
         print(des_x, des_y)
 
-        distance = (get_distance((self_x, self_y), (des_x, des_y+75)))
+        distance = (get_distance((self_x, self_y), (des_x, des_y)))
 
         print(distance)
         t = calculate_time(distance)
@@ -53,13 +55,14 @@ def get_self_position(img):
     point_list = list()
     for x in range(width):
         for y in range(height):
-            rgb = (img.getpixel((x, y)))
+            rgb = img.getpixel((x, y))
             if rgb_compare(self_rgb, rgb):
                 point_list.append((x, y))
 
     # return sum([each[0] for each in point_list])/len(point_list),\
     #        sum([each[1] for each in point_list])/len(point_list)
     return point_list[-1][0] - 20, point_list[-1][1]
+
 
 def rgb_compare(a, b):
     for i in range(3):
@@ -70,44 +73,33 @@ def rgb_compare(a, b):
     else:
         return True
 
+
 def get_des_position(img):
     # 灰度图
-    img = img.convert('1')
-    # 计算均值
-    mean = ImageStat.Stat(img).mean[0]
-    # 二值化
-    img = img.point(lambda x: 0 if x < mean else 255)
+    img = img.convert('L')
+    # Laplace算子
+    suanzi1 = np.array([[0, 1, 0],
+                        [1, -4, 1],
+                        [0, 1, 0]])
+    img = signal.convolve2d(img, suanzi1, mode="same")
+    img = (img / float(img.max())) * 255
+    img[img > img.mean()] = 255
+    img[img <= img.mean()] = 0
 
-    img.save('temp1.png')
+    _row = 0
+    for index, row in enumerate(img[::-1]):
+        if list(row).count(0) == 4:
+            _row = index
+            break
+    des_y = 1050 - _row
 
-    data = np.array(img.getdata())
-    data.resize(1050, 1080)
+    des_row = list(img[des_y])[1:-1]
+    des_x = (des_row.index(0) + len(des_row) - des_row[::-1].index(0)) / 2
 
-    # row and times
-    max_num = (0, 0)
-    for index, row in enumerate(data):
-        temp = longest_list(row.tolist())[1]
-        max_num = (index, temp) if temp > max_num[1] else max_num
+    img = Image.fromarray(img)
+    img.show()
 
-    des_y = max_num[0]
-    temp = longest_list(data[max_num[0]])
-    des_x = (temp[1] + sum(temp))/2
     return des_x, des_y
-
-
-def longest_list(_list):
-    max_list = (0, 0)
-    for index, each in enumerate(_list):
-        if each == 0:
-            count = 0
-            begin_point = index
-            for i in _list[index+1:]:
-                if i != 0:
-                    break
-                else:
-                    count += 1
-            max_list = (begin_point, count) if count > max_list[1] else max_list
-    return max_list
 
 
 analyse_pic('temp.png')
