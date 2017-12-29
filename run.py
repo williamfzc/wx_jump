@@ -12,7 +12,7 @@ def get_pic(_pic_path):
 
 
 def calculate_time(dis):
-    return int(dis * 710 / 455.8)
+    return int(dis * 710 / 436.165)
 
 
 def analyse_pic(_pic_path):
@@ -38,7 +38,7 @@ def analyse_pic(_pic_path):
         t = calculate_time(distance)
         print(t)
 
-        # os.system('adb shell input swipe 100 100 100 100 {}'.format(t))
+        os.system('adb shell input swipe 100 100 100 100 {}'.format(t))
         time.sleep(2)
 
 
@@ -61,7 +61,7 @@ def get_self_position(img):
 
     # return sum([each[0] for each in point_list])/len(point_list),\
     #        sum([each[1] for each in point_list])/len(point_list)
-    return point_list[-1][0] - 20, point_list[-1][1]
+    return point_list[-1][0], point_list[-1][1]
 
 
 def rgb_compare(a, b):
@@ -91,6 +91,11 @@ def get_des_position(img):
         if list(row).count(0) == 4:
             _row = index
             break
+    if _row > 500:
+        for index, row in enumerate(img[::-1]):
+            if list(row).count(0) == 5:
+                _row = index
+                break
     des_y = 1050 - _row
 
     des_row = list(img[des_y])[1:-1]
