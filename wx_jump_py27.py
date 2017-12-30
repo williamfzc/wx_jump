@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
-DISTANCE_ARG = 1.286
+DISTANCE_ARG = 1.29
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
 # 设备型号
