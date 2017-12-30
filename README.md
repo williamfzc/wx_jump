@@ -9,6 +9,10 @@
 - 打开微信-跳一跳小游戏，点击开始游戏
 - 运行wx_jump_py27.py即可
 
+效果如图
+
+ ![image](https://github.com/williamfzc/wx_jump/raw/master/demo.jpg)
+
 ## 思路
 
 - 用adb获取手机截图并拉取到项目中
