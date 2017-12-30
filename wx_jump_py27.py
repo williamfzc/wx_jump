@@ -12,6 +12,10 @@ SELF_RGB = (62, 56, 79)
 DEVICE_SCREEN = (1080, 1920)
 # 临时文件位置
 TEMP_FILE_PATH = 'temp.png'
+# 菱形顶端到中心点的猜测值
+DIAMAND_DISTANCE = 50
+# 棋子底端中心点到棋子边缘的距离
+CHESS_WIDTH = 20
 
 
 def get_pic(_pic_path):
@@ -41,7 +45,7 @@ def get_self_position(_img_path):
             if rgb_compare(SELF_RGB, each_point):
                 point_list.append((x, y))
 
-    return point_list[-1][0], point_list[-1][1]+50
+    return point_list[-1][0]-CHESS_WIDTH, point_list[-1][1]
 
 
 def rgb_compare(a, b):
@@ -67,13 +71,14 @@ def get_des_position(_img_path):
     # 按行扫描图片
     for index, each in enumerate(_img):
         old_line = _img[index-1]
+        # 如果有变化说明检测到顶端
         if (each - old_line).any():
             # black line
             if any(map(lambda x: list(x).count(True) > len(each)/2, (each, old_line))):
                 continue
             else:
                 des_x = _get_des_x(each, old_line)
-                des_y = index + 350
+                des_y = index + 300 + DIAMAND_DISTANCE
                 break
     else:
         raise ValueError('Something error.')
