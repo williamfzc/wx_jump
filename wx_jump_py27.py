@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
-DISTANCE_ARG = 1.295
+DISTANCE_ARG = 1.32
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
 # 设备型号
@@ -143,5 +143,7 @@ if __name__ == '__main__':
             apply_to_adb(t)
 
         except IndexError:
+            # 截图方便debug
+            get_pic('error{}.png'.format(str(time.time()).split('.')[0]))
             # 重新开始
             apply_to_adb(200)
