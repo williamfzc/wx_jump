@@ -16,6 +16,8 @@ TEMP_FILE_PATH = 'temp.png'
 DIAMAND_DISTANCE = 50
 # 棋子底端中心点到棋子边缘的距离
 CHESS_WIDTH = 25
+# 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
+WAIT_TIME = 1
 
 
 def get_pic(_pic_path):
@@ -112,7 +114,7 @@ def print_log(_self_point, _des_point, _distance, _t):
 def apply_to_adb(_t):
     """ 用adb操作手机 """
     os.system('adb shell input swipe 580 1600 580 1600 {}'.format(_t))
-    time.sleep(1)
+    time.sleep(WAIT_TIME)
 
 
 if __name__ == '__main__':
