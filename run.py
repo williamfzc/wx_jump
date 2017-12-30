@@ -1,9 +1,8 @@
-from PIL import Image, ImageStat, ImageFilter, ImageDraw
+# -*- coding:utf-8 -*-
+from PIL import Image, ImageFilter
 import os
 import numpy as np
 import time
-import scipy.signal as signal
-import matplotlib.pyplot as plt
 
 
 def get_pic(_pic_path):
@@ -12,40 +11,11 @@ def get_pic(_pic_path):
 
 
 def calculate_time(dis):
-    return int(dis * 710 / 482.44792465094093)
-
-
-def analyse_pic(_pic_path):
-
-    while True:
-        get_pic('temp.png')
-
-        img = Image.open(_pic_path)
-
-
-        # get self location
-        self_x, self_y = get_self_position(img)
-
-        img = img.crop((0, 0, 1080, 900))
-
-        # get des location
-        des_x, des_y = get_des_position(img)
-
-        print(self_x, self_y)
-        print(des_x, des_y)
-
-        distance = (get_distance((self_x, self_y), (des_x, des_y)))
-
-        print(distance)
-        t = calculate_time(distance)
-        print(t)
-
-        os.system('adb shell input swipe 100 100 100 100 {}'.format(t))
-        time.sleep(2)
+    return int(dis * 1.23)
 
 
 def get_distance(point1, point2):
-    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)**(1/2)
+    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
 
 def get_self_position(img):
@@ -61,8 +31,6 @@ def get_self_position(img):
             if rgb_compare(self_rgb, rgb):
                 point_list.append((x, y))
 
-    # return sum([each[0] for each in point_list])/len(point_list),\
-    #        sum([each[1] for each in point_list])/len(point_list)
     return point_list[-1][0], point_list[-1][1]+50
 
 
@@ -76,66 +44,56 @@ def rgb_compare(a, b):
         return True
 
 
-def depoint(img):
-    pixdata = img.load()
-    w,h = img.size
-    for y in range(1,h-1):
-        for x in range(1,w-1):
-            count = 0
-            if pixdata[x,y-1] < 15:
-                count = count + 1
-            if pixdata[x,y+1] < 15:
-                count = count + 1
-            if pixdata[x-1,y] < 15:
-                count = count + 1
-            if pixdata[x+1,y] < 15:
-                count = count + 1
-            if count > 2:
-                pixdata[x, y] = 0
-    return img
-
-
 def get_des_position(img):
     img = img.filter(ImageFilter.FIND_EDGES)
-    # 灰度图
-    img = img.convert('L')
-    #
-    img = depoint(img)
-
-    img = np.array(img)
-    img[img > 2] = 255
-    img[img <= 2] = 0
-
-    # img = Image.fromarray(img)
-    # img.save('temp1.png')
-
-    _row = 0
-    for index, row in enumerate(img[::-1]):
-        if list(row).count(255) in range(2, 8):
-            _row = index
-            break
-    # if _row > 400:
-    #     for index, row in enumerate(img[::-1]):
-    #         if list(row).count(255) in range(3, 8):
-    #             _row = index
-    #             break
-    des_y = 900 - _row
-
-    des_row = list(img[des_y])[1:-1]
-    front = des_row.index(255)
-    back = len(des_row) - des_row[::-1].index(255)
-    if back - front < 50:
-        des_x = des_row.index(255) + 210
-    else:
-        des_x = (front + back) / 2
-    # des_x = des_row.index(255) + 210
-
-    img = Image.fromarray(img)
-    draw = ImageDraw.Draw(img)
-    draw.arc((des_x, des_y, des_x + 20, des_y + 20), 0, 360, fill=150)
+    img = img.filter(ImageFilter.FIND_EDGES)
+    # 2 value
+    img = img.convert('1')
     img.save('temp1.png')
+    img = np.array(img)[300:]
 
+    for index, each in enumerate(img):
+        old_line = img[index-1]
+        if (each - old_line).any():
+            # black line
+            if list(each).count(True) > len(each)/2 \
+                    or list(old_line).count(True) > len(old_line)/2:
+                continue
+            else:
+                des_x = get_des_x(each, old_line)
+                des_y = index + 350
+                break
+    else:
+        raise ValueError('Something error.')
     return des_x, des_y
 
 
-analyse_pic('temp.png')
+def get_des_x(line1, line2):
+    for i, a in enumerate(zip(line1, line2)):
+        if a[0] != a[1]:
+            return i
+    else:
+        raise ValueError('Nothing different.')
+
+
+if __name__ == '__main__':
+    while True:
+        # get screen pic
+        get_pic('temp.png')
+        img = Image.open('temp.png')
+        # get self location
+        self_x, self_y = get_self_position(img)
+        # get des location
+        des_x, des_y = get_des_position(img)
+        # get distance
+        distance = get_distance((self_x, self_y), (des_x, des_y))
+        # cal press time
+        t = calculate_time(distance)
+        # print log
+        print 'self location: {}, {}'.format(self_x, self_y)
+        print 'des location: {}, {}'.format(des_x, des_y)
+        print 'x distance: {}'.format(distance)
+        print 'press time: {}'.format(t)
+        # do
+        os.system('adb shell input swipe 100 100 100 100 {}'.format(t))
+        time.sleep(1)
