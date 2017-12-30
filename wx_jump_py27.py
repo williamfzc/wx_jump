@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
-DISTANCE_ARG = 1.29
+DISTANCE_ARG = 1.295
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
 # 设备型号
@@ -93,6 +93,14 @@ def _get_des_x(line1, line2):
         raise ValueError('Nothing different.')
 
 
+def fix_distance(_self_point, _des_point, _origin_dis):
+    if abs(_self_point[0] - _des_point[0]) < 100:
+        # 取巧：如果头顶比菱形顶端高意味着两者距离很近，此处为一个近似值
+        return 200
+    else:
+        return _origin_dis
+
+
 def print_log(_self_point, _des_point, _distance, _t):
     """ 打印计算结果方便调试 """
     print 'self location: {}, {}'.format(_self_point[0], _self_point[1])
@@ -103,29 +111,37 @@ def print_log(_self_point, _des_point, _distance, _t):
 
 def apply_to_adb(_t):
     """ 用adb操作手机 """
-    os.system('adb shell input swipe 100 100 100 100 {}'.format(_t))
+    os.system('adb shell input swipe 580 1600 580 1600 {}'.format(_t))
     time.sleep(1)
 
 
 if __name__ == '__main__':
     while True:
-        # get screen pic
-        get_pic(TEMP_FILE_PATH)
+        try:
+            # get screen pic
+            get_pic(TEMP_FILE_PATH)
 
-        # get self location
-        self_point = get_self_position(TEMP_FILE_PATH)
+            # get self location
+            self_point = get_self_position(TEMP_FILE_PATH)
 
-        # get des location
-        des_point = get_des_position(TEMP_FILE_PATH)
+            # get des location
+            des_point = get_des_position(TEMP_FILE_PATH)
 
-        # get distance
-        distance = get_distance(self_point, des_point)
+            # get distance
+            distance = get_distance(self_point, des_point)
 
-        # cal press time
-        t = calculate_time(distance)
+            # fix distance
+            distance = fix_distance(self_point, des_point, distance)
 
-        # print log
-        print_log(self_point, des_point, distance, t)
+            # cal press time
+            t = calculate_time(distance)
 
-        # DO
-        apply_to_adb(t)
+            # print log
+            print_log(self_point, des_point, distance, t)
+
+            # DO
+            apply_to_adb(t)
+
+        except IndexError:
+            # 重新开始
+            apply_to_adb(200)
