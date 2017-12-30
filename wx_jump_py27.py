@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
-DISTANCE_ARG = 1.23
+DISTANCE_ARG = 1.286
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
 # 设备型号
@@ -15,7 +15,7 @@ TEMP_FILE_PATH = 'temp.png'
 # 菱形顶端到中心点的猜测值
 DIAMAND_DISTANCE = 50
 # 棋子底端中心点到棋子边缘的距离
-CHESS_WIDTH = 20
+CHESS_WIDTH = 25
 
 
 def get_pic(_pic_path):
