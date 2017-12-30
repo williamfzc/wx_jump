@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
-DISTANCE_ARG = 1.32
+DISTANCE_ARG = 1.28
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
 # 设备型号
@@ -14,9 +14,11 @@ TEMP_FILE_PATH = 'temp.png'
 # 菱形顶端到中心点的猜测值
 DIAMAND_DISTANCE = 50
 # 棋子底端中心点到棋子边缘的距离
-CHESS_WIDTH = 25
+CHESS_WIDTH = 35
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
-WAIT_TIME = 1
+WAIT_TIME = 2
+# 顶端屏蔽区域厚度
+IGNORE_HEIGHT = 500
 
 
 def get_pic(_pic_path):
@@ -68,7 +70,7 @@ def get_des_position(_img_path):
     _img = _img.convert('1')
     _img.save('temp1.png')
     # 排除顶端的干扰
-    _img = np.array(_img)[300:]
+    _img = np.array(_img)[IGNORE_HEIGHT:]
     # 按行扫描图片
     for index, each in enumerate(_img):
         old_line = _img[index-1]
@@ -79,7 +81,8 @@ def get_des_position(_img_path):
                 continue
             else:
                 des_x = _get_des_x(each, old_line)
-                des_y = index + 300 + DIAMAND_DISTANCE
+                # des_y = index + IGNORE_HEIGHT + DIAMAND_DISTANCE
+                des_y = _get_des_y(index, des_x, _img)
                 break
     else:
         raise ValueError('Something error.')
@@ -92,6 +95,18 @@ def _get_des_x(line1, line2):
             return i
     else:
         raise ValueError('Nothing different.')
+
+
+def _get_des_y(_cur_row, _des_x, _img):
+    _des_col = [x[_des_x] for x in _img]
+    _result = 0
+    for i, each in enumerate(_des_col[(_cur_row+1):]):
+        if each:
+            _result = int((i + _cur_row)/2) + IGNORE_HEIGHT
+            break
+    if _result - _cur_row - IGNORE_HEIGHT < 50:
+        _result = _cur_row + IGNORE_HEIGHT + DIAMAND_DISTANCE
+    return _result
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
