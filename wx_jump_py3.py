@@ -4,6 +4,14 @@ import numpy as np
 import time
 
 # 该数值为1080x1920上的，可能需要微调
+# 调整方法：
+# 先把下方的DEVICE_SCREEN参数改成你手机的分辨率
+# 用adb命令 ‘adb shell input swipe 580 1600 580 1600 XXX’ 尝试跳第一个点，记录准确的XXX
+# DISTANCE_ARG 为 XXX 除以 跳第一个点算出来的距离
+# 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
+# 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
+# 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
+
 DISTANCE_ARG = 1.28
 # 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
 SELF_RGB = (62, 56, 79)
