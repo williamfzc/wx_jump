@@ -1,4 +1,4 @@
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageDraw
 import os
 import numpy as np
 import time
@@ -11,22 +11,22 @@ import time
 # 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
 # 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
 # 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
-
-DISTANCE_ARG = 1.28
-# 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
-SELF_RGB = (62, 56, 79)
+DISTANCE_ARG = 1.4
 # 设备型号
 DEVICE_SCREEN = (1080, 1920)
-# 临时文件位置
-TEMP_FILE_PATH = 'temp.png'
-# 菱形顶端到中心点的猜测值
-DIAMAND_DISTANCE = 50
-# 棋子底端中心点到棋子边缘的距离
-CHESS_WIDTH = 35
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
 WAIT_TIME = 2
-# 顶端屏蔽区域厚度
-IGNORE_HEIGHT = 500
+
+# ----------------------------------------------------------
+
+# 临时文件位置
+TEMP_FILE_PATH = 'temp.png'
+# 棋子底端中心点到棋子边缘的距离
+CHESS_WIDTH = int(DEVICE_SCREEN[0] * 0.032407)
+# 屏蔽区域厚度
+IGNORE_HEIGHT = (int(DEVICE_SCREEN[1] / 4), int(DEVICE_SCREEN[1] / 2))
+# 棋子的RGB数值，可能因为设备不同有偏差，可能需要微调
+SELF_RGB = (62, 56, 79)
 
 
 def get_pic(_pic_path):
@@ -42,6 +42,9 @@ def calculate_time(dis):
 
 def get_distance(point1, point2):
     """ 计算距离 """
+    draw = ImageDraw.Draw(Image.open('temp.png'))
+    draw.arc((point2[0], point2[1], point2[0] + 20, point2[1] + 20), 0, 360, fill=150)
+
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
 
@@ -78,7 +81,7 @@ def get_des_position(_img_path):
     _img = _img.convert('1')
     _img.save('temp1.png')
     # 排除顶端的干扰
-    _img = np.array(_img)[IGNORE_HEIGHT:]
+    _img = np.array(_img)[IGNORE_HEIGHT[0]:]
     # 按行扫描图片
     for index, each in enumerate(_img):
         old_line = _img[index-1]
@@ -89,7 +92,6 @@ def get_des_position(_img_path):
                 continue
             else:
                 des_x = _get_des_x(each, old_line)
-                # des_y = index + IGNORE_HEIGHT + DIAMAND_DISTANCE
                 des_y = _get_des_y(index, des_x, _img)
                 break
     else:
@@ -106,15 +108,33 @@ def _get_des_x(line1, line2):
 
 
 def _get_des_y(_cur_row, _des_x, _img):
-    _des_col = [x[_des_x] for x in _img]
-    _result = 0
-    for i, each in enumerate(_des_col[(_cur_row+1):]):
-        if each:
-            _result = int((i + _cur_row)/2) + IGNORE_HEIGHT
-            break
-    if _result - _cur_row - IGNORE_HEIGHT < 50:
-        _result = _cur_row + IGNORE_HEIGHT + DIAMAND_DISTANCE
-    return _result
+
+    if _des_x > DEVICE_SCREEN[0]/2:
+        # 在屏幕右侧
+        print('RIGHT SIDE')
+        _cols_list = _img[:IGNORE_HEIGHT[1]-1].T[::-1]
+        for i, each_col in enumerate(_cols_list):
+            _old_line = _cols_list[i-1]
+            if (each_col - _old_line).any():
+                # black line
+                if any(map(lambda x: list(x).count(True) > int(len(each_col) / 2), (each_col, _old_line))):
+                    continue
+                else:
+                    _result = _get_des_x(each_col, _old_line) + IGNORE_HEIGHT[0]
+                    return _result
+    else:
+        # 在屏幕左侧
+        print('LEFT SIDE')
+        _cols_list = _img[:IGNORE_HEIGHT[1] - 1].T[::-1][int(DEVICE_SCREEN[0]/2):]
+        for i, each_col in enumerate(_cols_list):
+            _old_line = _cols_list[i-1]
+            if (each_col - _old_line).any():
+                # black line
+                if any(map(lambda x: list(x).count(True) > int(len(each_col) / 2), (each_col, _old_line))):
+                    continue
+                else:
+                    _result = _get_des_x(each_col, _old_line) + IGNORE_HEIGHT[0]
+                    return _result
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
