@@ -138,9 +138,9 @@ def _get_des_y(_cur_row, _des_x, _img):
 
 def _get_des_y2(_cur_row, _des_x, _img):
     for row_num, each_row in enumerate(_img[_cur_row:]):
-        if each_row[_des_x+1]:
+        if each_row[_des_x + 1]:
             _des_x = _des_x + 1
-        elif each_row[_des_x+2]:
+        elif each_row[_des_x + 2]:
             _des_x = _des_x + 2
         elif each_row[_des_x + 3]:
             _des_x = _des_x + 3
