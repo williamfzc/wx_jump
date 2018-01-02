@@ -11,7 +11,7 @@ import time
 # 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
 # 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
 # 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
-DISTANCE_ARG = 1.393
+DISTANCE_ARG = 1.39
 # 设备型号
 DEVICE_SCREEN = (1080, 1920)
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
@@ -75,7 +75,7 @@ def get_des_position(_img_path):
     """ 获取目标点位置 """
     _img = Image.open(_img_path)
     # 两次边缘检测
-    _img = _img.filter(ImageFilter.FIND_EDGES)
+    _img = _img.filter(ImageFilter.EDGE_ENHANCE_MORE)
     _img = _img.filter(ImageFilter.FIND_EDGES)
     # 2 value
     _img = _img.convert('1')
@@ -138,10 +138,16 @@ def _get_des_y(_cur_row, _des_x, _img):
 
 def _get_des_y2(_cur_row, _des_x, _img):
     _rows = _img[_cur_row:]
-    for row_num, each_row in enumerate(_rows):
-        _next = list(each_row[_des_x:]).index(True)
-        if _next > 5:
-            return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
+    _des_x += list(_rows[0][_des_x::]).index(False)
+    print(_des_x)
+    for row_num, each_row in enumerate(_rows[1:]):
+        _next = list(_rows[row_num+1][_des_x:]).index(True)
+        if _next > 30:
+            _next = list(_rows[row_num+2][_des_x:]).index(True)
+            if _next > 30:
+                return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
+            else:
+                _des_x += _next
         elif _next == 0:
             _des_x += 1
         else:
