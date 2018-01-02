@@ -92,7 +92,7 @@ def get_des_position(_img_path):
                 continue
             else:
                 des_x = _get_des_x(each, old_line)
-                des_y = _get_des_y(index, des_x, _img)
+                des_y = _get_des_y2(index, des_x, _img)
                 break
     else:
         raise ValueError('Something error.')
@@ -134,6 +134,18 @@ def _get_des_y(_cur_row, _des_x, _img):
                 else:
                     _result = _get_des_x(each_col, _old_line)
                     return int((_result + _cur_row) * 95/192) + IGNORE_HEIGHT[0]
+
+
+def _get_des_y2(_cur_row, _des_x, _img):
+    for row_num, each_row in enumerate(_img[_cur_row:]):
+        if each_row[_des_x+1]:
+            _des_x = _des_x + 1
+        elif each_row[_des_x+2]:
+            _des_x = _des_x + 2
+        elif each_row[_des_x + 3]:
+            _des_x = _des_x + 3
+        else:
+            return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
