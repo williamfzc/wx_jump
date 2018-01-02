@@ -71,7 +71,7 @@ def rgb_compare(a, b):
         return True
 
 
-def get_des_position(_img_path):
+def get_des_position(_img_path, _self_point):
     """ 获取目标点位置 """
     _img = Image.open(_img_path)
     # 两次边缘检测
@@ -93,7 +93,10 @@ def get_des_position(_img_path):
             else:
                 des_x = _get_des_x(each, old_line)
                 des_y = _get_des_y(index, des_x, _img)
-                break
+                if abs(des_x - self_point[0]) < CHESS_WIDTH:
+                    continue
+                else:
+                    break
     else:
         raise ValueError('Something error.')
     return des_x, des_y
@@ -160,7 +163,7 @@ if __name__ == '__main__':
             self_point = get_self_position(TEMP_FILE_PATH)
 
             # get des location
-            des_point = get_des_position(TEMP_FILE_PATH)
+            des_point = get_des_position(TEMP_FILE_PATH, self_point)
 
             # get distance
             distance = get_distance(self_point, des_point)
