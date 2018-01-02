@@ -137,15 +137,15 @@ def _get_des_y(_cur_row, _des_x, _img):
 
 
 def _get_des_y2(_cur_row, _des_x, _img):
-    for row_num, each_row in enumerate(_img[_cur_row:]):
-        if each_row[_des_x + 1]:
-            _des_x = _des_x + 1
-        elif each_row[_des_x + 2]:
-            _des_x = _des_x + 2
-        elif each_row[_des_x + 3]:
-            _des_x = _des_x + 3
-        else:
+    _rows = _img[_cur_row:]
+    for row_num, each_row in enumerate(_rows):
+        _next = list(each_row[_des_x:]).index(True)
+        if _next > 5:
             return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
+        elif _next == 0:
+            _des_x += 1
+        else:
+            _des_x += _next
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
