@@ -11,7 +11,7 @@ import time
 # 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
 # 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
 # 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
-DISTANCE_ARG = 1.383
+DISTANCE_ARG = 1.39
 # 设备型号
 DEVICE_SCREEN = (1080, 1920)
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
@@ -86,7 +86,7 @@ def get_des_position(_img_path):
     for index, each in enumerate(_img):
         old_line = _img[index-1]
         # 如果有变化说明检测到顶端
-        if (each - old_line).any():
+        if (each[1:-1] - old_line[1:-1]).any():
             # black line
             if any(map(lambda x: list(x).count(True) > int(len(each)/2), (each, old_line))):
                 continue
@@ -139,7 +139,7 @@ def _get_des_y(_cur_row, _des_x, _img):
 def fix_distance(_self_point, _des_point, _origin_dis):
     if abs(_self_point[0] - _des_point[0]) < 100:
         # 取巧：如果头顶比菱形顶端高意味着两者距离很近，此处为一个近似值
-        return 200
+        return 180
     else:
         return _origin_dis
 
