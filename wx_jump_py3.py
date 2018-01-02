@@ -75,7 +75,7 @@ def get_des_position(_img_path):
     """ 获取目标点位置 """
     _img = Image.open(_img_path)
     # 两次边缘检测
-    _img = _img.filter(ImageFilter.EDGE_ENHANCE_MORE)
+    _img = _img.filter(ImageFilter.FIND_EDGES)
     _img = _img.filter(ImageFilter.FIND_EDGES)
     # 2 value
     _img = _img.convert('1')
@@ -139,9 +139,8 @@ def _get_des_y(_cur_row, _des_x, _img):
 def _get_des_y2(_cur_row, _des_x, _img):
     _rows = _img[_cur_row:]
     _des_x += list(_rows[0][_des_x::]).index(False)
-    print(_des_x)
     for row_num, each_row in enumerate(_rows[1:]):
-        _next = list(_rows[row_num+1][_des_x:]).index(True)
+        _next = list(_rows[row_num+1][_des_x:]).index(True) if True in list(_rows[row_num+1][_des_x:]) else 0
         if _next > 30:
             _next = list(_rows[row_num+2][_des_x:]).index(True)
             if _next > 30:
@@ -152,12 +151,16 @@ def _get_des_y2(_cur_row, _des_x, _img):
             _des_x += 1
         else:
             _des_x += _next
+        if _des_x >= DEVICE_SCREEN[0]:
+            return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
+    else:
+        raise ValueError('NO DES POINT FOUND.')
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
     if abs(_self_point[0] - _des_point[0]) < 100:
         # 取巧：如果头顶比菱形顶端高意味着两者距离很近，此处为一个近似值
-        return 200
+        return 180
     else:
         return _origin_dis
 
