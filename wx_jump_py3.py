@@ -157,33 +157,26 @@ def apply_to_adb(_t):
 
 if __name__ == '__main__':
     while True:
-        try:
-            # get screen pic
-            get_pic(TEMP_FILE_PATH)
+        # get screen pic
+        get_pic(TEMP_FILE_PATH)
 
-            # get self location
-            self_point = get_self_position(TEMP_FILE_PATH)
+        # get self location
+        self_point = get_self_position(TEMP_FILE_PATH)
 
-            # get des location
-            des_point = get_des_position(TEMP_FILE_PATH, self_point)
+        # get des location
+        des_point = get_des_position(TEMP_FILE_PATH, self_point)
 
-            # get distance
-            distance = get_distance(self_point, des_point)
+        # get distance
+        distance = get_distance(self_point, des_point)
 
-            # fix distance
-            distance = fix_distance(self_point, des_point, distance)
+        # fix distance
+        distance = fix_distance(self_point, des_point, distance)
 
-            # cal press time
-            t = calculate_time(distance)
+        # cal press time
+        t = calculate_time(distance)
 
-            # print log
-            print_log(self_point, des_point, distance, t)
+        # print log
+        print_log(self_point, des_point, distance, t)
 
-            # DO
-            apply_to_adb(t)
-
-        except IndexError:
-            # 截图方便debug
-            get_pic('error{}.png'.format(str(time.time()).split('.')[0]))
-            # 重新开始
-            apply_to_adb(200)
+        # DO
+        apply_to_adb(t)
