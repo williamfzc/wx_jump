@@ -133,7 +133,7 @@ def _get_des_y(_cur_row, _des_x, _img):
 
 
 def fix_distance(_self_point, _des_point, _origin_dis):
-    if abs(_self_point[0] - _des_point[0]) < 100:
+    if abs(_self_point[0] - _des_point[0]) < 50:
         # 取巧：如果头顶比菱形顶端高意味着两者距离很近，此处为一个近似值
         return 180
     else:
@@ -150,7 +150,8 @@ def print_log(_self_point, _des_point, _distance, _t):
 
 def apply_to_adb(_t):
     """ 用adb操作手机 """
-    r_x, r_y = random.random()*DEVICE_SCREEN[0], random.random()*DEVICE_SCREEN[1]
+    r_x, r_y = random.uniform(DEVICE_SCREEN[0]/2, DEVICE_SCREEN[0]/2 + 100), \
+               random.uniform(DEVICE_SCREEN[1]/6, DEVICE_SCREEN[1]/6 - 100)
     os.system('adb shell input swipe {} {} {} {} {}'.format(r_x, r_y, r_x, r_y, _t))
     time.sleep(WAIT_TIME + random.random())
 
@@ -170,7 +171,7 @@ if __name__ == '__main__':
         distance = get_distance(self_point, des_point)
 
         # fix distance
-        distance = fix_distance(self_point, des_point, distance)
+        # distance = fix_distance(self_point, des_point, distance)
 
         # cal press time
         t = calculate_time(distance)
