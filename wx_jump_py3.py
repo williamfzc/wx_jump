@@ -2,6 +2,7 @@ from PIL import Image, ImageFilter, ImageDraw
 import os
 import numpy as np
 import time
+import random
 
 # 该数值为1080x1920上的，可能需要微调
 # 调整方法：
@@ -149,8 +150,9 @@ def print_log(_self_point, _des_point, _distance, _t):
 
 def apply_to_adb(_t):
     """ 用adb操作手机 """
-    os.system('adb shell input swipe 580 1600 580 1600 {}'.format(_t))
-    time.sleep(WAIT_TIME)
+    r_x, r_y = random.random()*DEVICE_SCREEN[0], random.random()*DEVICE_SCREEN[1]
+    os.system('adb shell input swipe {} {} {} {} {}'.format(r_x, r_y, r_x, r_y, _t))
+    time.sleep(WAIT_TIME + random.random())
 
 
 if __name__ == '__main__':
