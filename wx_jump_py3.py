@@ -94,7 +94,7 @@ def get_des_position(_img_path, _self_point):
             else:
                 des_x = _get_des_x(each, old_line)
                 des_y = _get_des_y(index, des_x, _img)
-                if abs(des_x - self_point[0]) < CHESS_WIDTH:
+                if abs(des_x - self_point[0]) < CHESS_WIDTH * 2:
                     continue
                 else:
                     break
@@ -132,14 +132,6 @@ def _get_des_y(_cur_row, _des_x, _img):
         raise ValueError('NO DES POINT FOUND.')
 
 
-def fix_distance(_self_point, _des_point, _origin_dis):
-    if abs(_self_point[0] - _des_point[0]) < 50:
-        # 取巧：如果头顶比菱形顶端高意味着两者距离很近，此处为一个近似值
-        return 180
-    else:
-        return _origin_dis
-
-
 def print_log(_self_point, _des_point, _distance, _t):
     """ 打印计算结果方便调试 """
     print('self location: {}, {}'.format(_self_point[0], _self_point[1]))
@@ -169,9 +161,6 @@ if __name__ == '__main__':
 
         # get distance
         distance = get_distance(self_point, des_point)
-
-        # fix distance
-        # distance = fix_distance(self_point, des_point, distance)
 
         # cal press time
         t = calculate_time(distance)
