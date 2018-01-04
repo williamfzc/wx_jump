@@ -12,7 +12,7 @@ import random
 # 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
 # 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
 # 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
-DISTANCE_ARG = 1.393
+DISTANCE_ARG = 1.3915
 # 设备型号
 DEVICE_SCREEN = (1080, 1920)
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
@@ -30,26 +30,26 @@ IGNORE_HEIGHT = (int(DEVICE_SCREEN[1] / 4), int(DEVICE_SCREEN[1] / 2))
 SELF_RGB = (62, 56, 79)
 
 
-def get_pic(_pic_path):
+def get_pic(_pic_path: '临时图片路径'):
     """ 从设备中获取截图 """
     os.system('adb shell screencap -p /sdcard/wx.png')
     os.system('adb pull /sdcard/wx.png {}'.format(_pic_path))
 
 
-def calculate_time(dis):
+def calculate_time(dis: '距离'):
     """ 根据距离计算时间 """
     return int(dis * DISTANCE_ARG)
 
 
 def get_distance(point1, point2):
-    """ 计算距离 """
+    """ 计算两点间距离 """
     draw = ImageDraw.Draw(Image.open('temp.png'))
     draw.arc((point2[0], point2[1], point2[0] + 20, point2[1] + 20), 0, 360, fill=150)
 
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
 
-def get_self_position(_img_path):
+def get_self_position(_img_path: '临时图片路径'):
     """ 获取自身位置 """
     _img = Image.open(_img_path)
 
@@ -72,7 +72,7 @@ def rgb_compare(a, b):
         return True
 
 
-def get_des_position(_img_path, _self_point):
+def get_des_position(_img_path: '临时图片路径', _self_point: '起始点坐标'):
     """ 获取目标点位置 """
     _img = Image.open(_img_path)
     # 两次边缘检测
@@ -112,7 +112,7 @@ def _get_des_x(line1, line2):
         raise ValueError('Nothing different.')
 
 
-def _get_des_y(_cur_row, _des_x, _img):
+def _get_des_y(_cur_row: '目标顶端所在行', _des_x: '目标点横坐标', _img: '图片矩阵'):
     """ 目标顶端从上往下扫描，如果右侧边缘不继续递增说明到达边界 """
     _rows = _img[_cur_row:]
     _des_x += list(_rows[0][_des_x::]).index(False)
@@ -142,7 +142,7 @@ def print_log(_self_point, _des_point, _distance, _t):
     print('press time: {}'.format(_t))
 
 
-def apply_to_adb(_t):
+def apply_to_adb(_t: '长按时间'):
     """ 用adb操作手机 """
     r_x, r_y = random.uniform(DEVICE_SCREEN[0]/2, DEVICE_SCREEN[0]/2 + 100), \
                random.uniform(DEVICE_SCREEN[1]/6, DEVICE_SCREEN[1]/6 - 100)
