@@ -49,11 +49,6 @@
 
  ![image](https://github.com/williamfzc/wx_jump/raw/master/demo.jpg)
 
-## TODO
-
-- 新定位算法对特殊图形仍有计算误差
-- 整型计算感觉会有不小误差
-
 ## BUG
 
 - 在目标点与起始点很近的情况下的判定可能有较明显误差
