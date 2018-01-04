@@ -12,7 +12,7 @@ import random
 # 例如，我运行第一遍算出来的distance为562.5，记录到的XXX为720
 # 那么此处的DISTANCE_ARG 为 720/562.5 = 1.28
 # 还没在很多机型上试过，后期会将该过程封装起来，目前大概是这么调整
-DISTANCE_ARG = 1.3915
+DISTANCE_ARG = 1.3925
 # 设备型号
 DEVICE_SCREEN = (1080, 1920)
 # 每次跳的停等时间，如果前期纪录较低建议设为2以防止“超越”字样的影响
@@ -38,7 +38,8 @@ def get_pic(_pic_path: '临时图片路径'):
 
 def calculate_time(dis: '距离'):
     """ 根据距离计算时间 """
-    return int(dis * DISTANCE_ARG)
+    _result = int(dis * DISTANCE_ARG)
+    return _result if _result > 200 else 200
 
 
 def get_distance(point1, point2):
@@ -118,9 +119,9 @@ def _get_des_y(_cur_row: '目标顶端所在行', _des_x: '目标点横坐标', 
     _des_x += list(_rows[0][_des_x::]).index(False)
     for row_num, each_row in enumerate(_rows[1:]):
         _next = list(_rows[row_num+1][_des_x:]).index(True) if True in list(_rows[row_num+1][_des_x:]) else 0
-        if _next > 30:
+        if _next > 15:
             _next = list(_rows[row_num+2][_des_x:]).index(True)
-            if _next > 30:
+            if _next > 15:
                 return row_num + IGNORE_HEIGHT[0] + _cur_row + 1
             else:
                 _des_x += _next
