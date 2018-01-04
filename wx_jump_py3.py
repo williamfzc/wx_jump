@@ -104,6 +104,7 @@ def get_des_position(_img_path, _self_point):
 
 
 def _get_des_x(line1, line2):
+    """ 获取目标点横坐标，通过前后行的差异匹配 """
     for i, a in enumerate(zip(line1[1:-1], line2[1:-1])):
         if a[0] != a[1]:
             return i + 1
@@ -112,6 +113,7 @@ def _get_des_x(line1, line2):
 
 
 def _get_des_y(_cur_row, _des_x, _img):
+    """ 目标顶端从上往下扫描，如果右侧边缘不继续递增说明到达边界 """
     _rows = _img[_cur_row:]
     _des_x += list(_rows[0][_des_x::]).index(False)
     for row_num, each_row in enumerate(_rows[1:]):
